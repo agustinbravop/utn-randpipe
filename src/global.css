@@ -1,0 +1,23 @@
+:root {
+	--green: #e3ffe7;
+	--blue: #d9e7ff;
+}
+
+body {
+	font-size: 1rem;
+	font-family: "Trebuchet MS";
+	background: linear-gradient(90deg, var(--green) 0%, var(--blue) 100%);
+}
+
+* {
+	font-size: 1em;
+	box-sizing: border-box;
+}
+
+h1 {
+	font-size: 2.5em;
+}
+
+p {
+	font-size: 1.2em;
+}
