@@ -1,6 +1,6 @@
 <script>
 	import { picks } from "$lib/stores";
-	import { fade } from "svelte/transition";
+	import { slide } from "svelte/transition";
 
 	// Most recent pick value.
 	let picked = "";
@@ -23,7 +23,7 @@
 	<button id="picker" on:click={handlePick}>Seleccionar</button>
 	<p>Resultado:</p>
 	{#key transition}
-		<p id="picked" title="picked" transition:fade>{picked}</p>
+		<p id="picked" title="picked" transition:slide>{picked}</p>
 	{/key}
 </div>
 

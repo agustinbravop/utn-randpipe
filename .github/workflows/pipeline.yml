@@ -1,6 +1,5 @@
-name: randpipe-ci-cd
-run-name: Continuous Integration and Deployment
-on: [push]
+name: Randpipe CI/CD
+on: [push, pull_request]
 
 jobs:
   integration:
@@ -21,23 +20,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 4. Prettier aplica una guía de estilos específica al código.
-      # Mejora la legibilidad cuando todos en el equipo codifican en el mismo formato.
-      - name: Code formatting
-        run: npm run format
-
-      # 5. Se construye la app para validar que compila correctamente.
+      # 4. Se construye la app para validar que compila correctamente.
       # Nota: Como esto es Svelte (JS + CSS + HTML), no es necesario
       # hacer la build para hacer format, lint o test.
       - name: Build
         run: npm run build
 
-      # 6. ESLint inspecciona el código para verificar que se cumplan
+      # 5. ESLint inspecciona el código para verificar que se cumplan
       # ciertos estándares de código, mejorando la calidad.
       - name: Code inspection
         run: npm run lint
 
-      # 7. Vitest ejecuta las pruebas unitarias y de componente.
+      # 6. Vitest ejecuta las pruebas unitarias y de componente.
       # Esto utiliza `jsdom` como entorno (minimalista) de browser.
       - name: Tests
         run: npm run test
