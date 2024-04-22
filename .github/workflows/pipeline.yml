@@ -1,0 +1,43 @@
+name: randpipe-ci-cd
+run-name: Continuous Integration and Deployment
+on: [push]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout de la rama para poder acceder al código.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Instala `npm` y `node` para poder instalar dependencias y ejecutar código JavaScript.
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # 3. Instala las dependencias del proyecto en `/node_modules`.
+      # NPM es el package manager predominante en el ecosistema de NodeJS.
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Prettier aplica una guía de estilos específica al código.
+      # Mejora la legibilidad cuando todos en el equipo codifican en el mismo formato.
+      - name: Code formatting
+        run: npm run format
+
+      # 5. Se construye la app para validar que compila correctamente.
+      # Nota: Como esto es Svelte (JS + CSS + HTML), no es necesario
+      # hacer la build para hacer format, lint o test.
+      - name: Build
+        run: npm run build
+
+      # 6. ESLint inspecciona el código para verificar que se cumplan
+      # ciertos estándares de código, mejorando la calidad.
+      - name: Code inspection
+        run: npm run lint
+
+      # 7. Vitest ejecuta las pruebas unitarias y de componente.
+      # Esto utiliza `jsdom` como entorno (minimalista) de browser.
+      - name: Tests
+        run: npm run test
