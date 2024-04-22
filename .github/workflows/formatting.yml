@@ -1,7 +1,5 @@
-name: Pre-commit Formatting
-on:
-  pull_request:
-    branches: [main]
+name: Commit Formatting
+on: [push, pull_request]
 
 jobs:
   formatting:

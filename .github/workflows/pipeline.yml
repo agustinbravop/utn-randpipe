@@ -1,4 +1,4 @@
-name: Randpipe CI/CD
+name: Integration and Deployment
 on: [push, pull_request]
 
 jobs:
