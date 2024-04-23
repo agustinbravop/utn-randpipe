@@ -20,10 +20,10 @@ jobs:
         uses: creyD/prettier_action@v4.3
         with:
           # Prettier CLI options: https://prettier.io/docs/en/cli
-          prettier_options: --write . --ignore-path .prettierignore --plugin=prettier-plugin-svelte
+          prettier_options: --write . --ignore-path .prettierignore
           same_commit: True
           only_changed: True
-          prettier_plugins: "prettier-plugin-svelte"
+          prettier_plugins: prettier-plugin-svelte
 
   integration:
     runs-on: ubuntu-latest
