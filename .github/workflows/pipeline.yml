@@ -2,8 +2,32 @@ name: Integration and Deployment
 on: [push, pull_request]
 
 jobs:
+  formatting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # Make sure the actual branch is checked out when running on pull requests
+          ref: ${{ github.head_ref }}
+          # This is important to fetch the changes to the previous commit
+          fetch-depth: 0
+
+      # Ejecuta Prettier para formatear el código del commit.
+      - name: Format code
+        # Ref: https://github.com/marketplace/actions/prettier-action
+        uses: creyD/prettier_action@v4.3
+        with:
+          # Prettier CLI options: https://prettier.io/docs/en/cli
+          prettier_options: --write . --config ./.prettierrc --ignore-path .prettierignore
+          same_commit: True
+          only_changed: True
+
   integration:
     runs-on: ubuntu-latest
+    needs: formatting
+
     steps:
       # 1. Checkout de la rama para poder acceder al código.
       - name: Checkout
@@ -39,6 +63,7 @@ jobs:
   containerization:
     needs: integration
     runs-on: ubuntu-latest
+
     env:
       # Variable de entorno para el Container registry domain.
       REGISTRY: ghcr.io
@@ -65,13 +90,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
-      - name: Extract metadata (tags, labels) for Docker
-        id: metadata
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
       # 7. Docker permite containerizar la app para luego ser deployada.
       # Se publica la imagen del container a GitHub Packages.
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
@@ -82,8 +100,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
+          tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_508afb725d9146b99a1626684b48a89e }}/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+          file: ./Dockerfile
 
   deployment:
     runs-on: ubuntu-latest
@@ -102,4 +120,4 @@ jobs:
           app-name: randpipe
           slot-name: production
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_2c32490d45c34fbf96e605f1e42ab03b }}
-          images: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_508afb725d9146b99a1626684b48a89e }}/agustinbravop/utn-randpipe:${{ github.sha }}
+          images: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_508afb725d9146b99a1626684b48a89e }}/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
