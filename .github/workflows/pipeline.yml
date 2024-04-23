@@ -23,6 +23,7 @@ jobs:
           prettier_options: --write . --config ./.prettierrc --ignore-path .prettierignore --plugin=prettier-plugin-svelte
           same_commit: True
           only_changed: True
+          prettier_plugins: "prettier-plugin-svelte"
 
   integration:
     runs-on: ubuntu-latest
