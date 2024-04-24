@@ -6,7 +6,7 @@
 body {
 	font-size: 1rem;
 	font-family: "Trebuchet MS";
-	background: linear-gradient(90deg, var(--green) 0%, var(--blue) 100%);
+	background: linear-gradient(90deg, var(--blue) 0%, var(--green) 100%);
 }
 
 * {
