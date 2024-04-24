@@ -77,7 +77,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_508afb725d9146b99a1626684b48a89e }}/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
           file: ./Dockerfile
 
   deployment:
@@ -97,4 +97,4 @@ jobs:
           app-name: randpipe
           slot-name: production
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_2c32490d45c34fbf96e605f1e42ab03b }}
-          images: ghcr.io/${{ secrets.AzureAppService_ContainerUsername_508afb725d9146b99a1626684b48a89e }}/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+          images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
