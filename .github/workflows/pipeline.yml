@@ -103,7 +103,7 @@ jobs:
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_2c32490d45c34fbf96e605f1e42ab03b }}
           images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
 
-  # Ref: https://github.com/marketplace/actions/github-actions-notifier-for-slack
+  # Ref: https://github.com/marketplace/actions/slack-notify
   feedback:
     needs: deployment
     if: always()
