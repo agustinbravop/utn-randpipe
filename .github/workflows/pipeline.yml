@@ -1,4 +1,4 @@
-name: Integration and Deployment
+name: Integration
 on: [pull_request]
 
 jobs:
@@ -6,33 +6,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout de la rama para poder acceder al código.
+      # Checkout de la rama para poder acceder al código.
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Instala `npm` y `node` para poder instalar dependencias y ejecutar código JavaScript.
+      # Instala `npm` y `node` para poder instalar dependencias y ejecutar código JavaScript.
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # 3. Instala las dependencias del proyecto en `/node_modules`.
+      # Instala las dependencias del proyecto en `/node_modules`.
       # NPM es el package manager predominante en el ecosistema de NodeJS.
       - name: Install dependencies
         run: npm install
 
-      # 4. ESLint inspecciona el código para verificar que se cumplan
+      # ESLint inspecciona el código para verificar que se cumplan
       # ciertos estándares de código, mejorando la calidad.
       - name: Code inspection
         run: npm run lint
 
-      # 5. Se construye la app para validar que compila correctamente.
+      # Se construye la app para validar que compila correctamente.
       # Nota: Como esto es Svelte (JS + CSS + HTML), no es necesario
       # hacer la build para hacer format, lint o test.
       - name: Build
         run: npm run build
 
-      # 6. Vitest ejecuta las pruebas unitarias y de componente.
+      # Vitest ejecuta las pruebas unitarias y de componente.
       # Esto utiliza `jsdom` como entorno (minimalista) de browser.
       - name: Tests
         run: npm run test
@@ -70,7 +70,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. Docker permite containerizar la app para luego ser deployada.
+      # Docker permite containerizar la app para luego ser deployada.
       # Se publica la imagen del container a GitHub Packages.
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
       # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see "[Usage](https://github.com/docker/build-push-action#usage)" in the README of the `docker/build-push-action` repository.
@@ -92,7 +92,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      # 8. Se instancia la imagen de Docker en un container del cloud de MS Azure.
+      # Se instancia la imagen de Docker en un container del cloud de MS Azure.
       # La infraestructura de Azure existe previo a este workflow.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -105,7 +105,7 @@ jobs:
 
   # Ref: https://github.com/marketplace/actions/github-actions-notifier-for-slack
   feedback:
-    needs: [deployment]
+    needs: deployment
     if: always()
     runs-on: ubuntu-latest
     steps:
