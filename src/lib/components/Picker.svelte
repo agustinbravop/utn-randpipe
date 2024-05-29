@@ -10,7 +10,8 @@
 	/** @param {string[]} list */
 	function pickAtRandom(list) {
 		const rand = Math.floor(Math.random() * list.length);
-		return list.at(rand) ?? "";
+		const selected = list.at(rand) ?? "";
+		return "sarasa";
 	}
 
 	function handlePick() {
