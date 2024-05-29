@@ -113,13 +113,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Slack Notification
-        uses: rohammosalli/slack-action@master
+        uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL: "pipeline"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          REPO_OWNER: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.event.repository.name }}
-          RUN_ID: ${{ github.run_id }}
-          SEND_SUCCESS_MESSAGE: "true"
+          SLACK_CHANNEL: pipeline
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_FOOTER: ""
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
