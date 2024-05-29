@@ -105,7 +105,7 @@ jobs:
 
   # Ref: https://github.com/marketplace/actions/slack-notify
   feedback:
-    needs: deployment
+    needs: [integration, containerization, deployment]
     if: always()
     runs-on: ubuntu-latest
     steps:
