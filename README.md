@@ -32,7 +32,7 @@ Algunos instantes luego de haber finalizado la ejecución de la pipeline, se deb
 
 ### Trazabilidad
 
-Se utilizó **Jira** para la planificación del trabajo y gestión de tareas. Este repositorio de GitHub está configurado para que los commits que en su descripción incluyan un código `RP-<num>` tengan embebido en ese código un hipervínculo hacia su tarea asociada en Jira con ese número identificador.
+Se utilizó **Jira** para la planificación del trabajo y gestión de tareas. Este repositorio de GitHub está configurado para que los commits que en su descripción incluyan un código `RP-<num>` tengan embebido en ese código un hipervínculo hacia su tarea asociada en Jira con ese identificador.
 
 También se pueden ver desde Jira los commits asociados a las tareas gracias a una app "GitHub for Jira", de manera que la trazabilidad es bidireccional. Al aceptar el merge de una pull request en GitHub, está configurada una regla de Jira Automation para automáticamente mover a "DONE" el issue asociado.
 
