@@ -11,7 +11,7 @@
 	function pickAtRandom(list) {
 		const rand = Math.floor(Math.random() * list.length);
 		const selected = list.at(rand) ?? "";
-		return "sarasa";
+		return selected;
 	}
 
 	function handlePick() {
