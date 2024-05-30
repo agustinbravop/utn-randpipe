@@ -1,56 +1,49 @@
-name: Integration and Deployment
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+name: Integration
+on: [pull_request]
 
 jobs:
   integration:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout de la rama para poder acceder al código.
+      # Checkout de la rama para poder acceder al código.
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Instala `npm` y `node` para poder instalar dependencias y ejecutar código JavaScript.
+      # Instala `npm` y `node` para poder gestionar dependencias y ejecutar código JavaScript.
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # 3. Instala las dependencias del proyecto en `/node_modules`.
       # NPM es el package manager predominante en el ecosistema de NodeJS.
+      # Instala las dependencias del proyecto en `/node_modules`.
       - name: Install dependencies
         run: npm install
 
-      # 4. ESLint inspecciona el código para verificar que se cumplan
-      # ciertos estándares de código, mejorando la calidad.
+      # ESLint inspecciona el código forzándolo a cumplir ciertas reglas de calidad.
+      # Prettier verifica que el formato del código se adhiera a la guía de estilos configurada.
       - name: Code inspection
         run: npm run lint
 
-      # 5. Se construye la app para validar que compila correctamente.
-      # Nota: Como esto es Svelte (JS + CSS + HTML), no es necesario
-      # hacer la build para hacer format, lint o test.
-      - name: Build
-        run: npm run build
-
-      # 6. Vitest ejecuta las pruebas unitarias y de componente.
-      # Esto utiliza `jsdom` como entorno (minimalista) de browser.
+      # Vitest ejecuta las pruebas unitarias y de componente.
+      # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
       - name: Tests
         run: npm run test
+
+      # Se construye la app para validar que se compila correctamente.
+      # Nota: Como esto es JS + CSS + HTML, los pasos previos no necesitan una build.
+      - name: Build
+        run: npm run build
 
   containerization:
     needs: integration
     runs-on: ubuntu-latest
 
     env:
-      # Variable de entorno para el Container registry domain.
+      # Variable de entorno para el container registry domain.
       REGISTRY: ghcr.io
-      # Nombre de la Docker image que este workflow crea.
+      # Nombre de la imagen de docker que este workflow crea.
       IMAGE_NAME: ${{ github.repository }}
 
     # Permisos del `GITHUB_TOKEN` para las actions de este job.
@@ -63,7 +56,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Crea e inicia un builder a usar en pasos siguientes.
+      # Docker Buildx es un plugin que extiende el comando `docker build` de la CLI de Docker.
       # Ref: https://github.com/docker/setup-buildx-action/tree/v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -76,11 +69,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. Docker permite containerizar la app para luego ser deployada.
+      # Docker permite containerizar la app para luego ser deployada.
       # Se publica la imagen del container a GitHub Packages.
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
-      # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see "[Usage](https://github.com/docker/build-push-action#usage)" in the README of the `docker/build-push-action` repository.
-      # It uses the `tags` and `labels` parameters to tag and label the image with the output from the "meta" step.
+      # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see https://github.com/docker/build-push-action#usage.
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -98,8 +90,8 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      # 8. Se instancia la imagen de Docker en un container del cloud de MS Azure.
-      # La infraestructura de Azure existe previo a este workflow.
+      # Se instancia la imagen de Docker en un container del cloud de Microsoft Azure.
+      # La infraestructura de Azure existe previamente a la ejecución de este workflow.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -108,3 +100,22 @@ jobs:
           slot-name: production
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_2c32490d45c34fbf96e605f1e42ab03b }}
           images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
+
+  feedback:
+    needs: [integration, containerization, deployment]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      # Para poder acceder a datos del repositorio en el paso siguiente.
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
+      # El workspace de Slack existe previamente a la ejecución de este workflow.
+      # Ref: https://github.com/marketplace/actions/slack-notify
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: pipeline
+          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
