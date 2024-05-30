@@ -23,8 +23,9 @@ jobs:
 
       # ESLint inspecciona el código forzándolo a cumplir ciertas reglas de calidad.
       # Prettier verifica que el formato del código se adhiera a la guía de estilos configurada.
+      # `svelte-check` hace un diagnóstico de CSS no utilizado y errores de compilador.
       - name: Code inspection
-        run: npm run lint
+        run: npm run lint && npm run check
 
       # Vitest ejecuta las pruebas unitarias y de componente.
       # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
