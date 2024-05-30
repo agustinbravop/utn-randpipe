@@ -42,9 +42,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Variable de entorno para el Container registry domain.
+      # Variable de entorno para el container registry domain.
       REGISTRY: ghcr.io
-      # Nombre de la Docker image que este workflow crea.
+      # Nombre de la imagen de docker que este workflow crea.
       IMAGE_NAME: ${{ github.repository }}
 
     # Permisos del `GITHUB_TOKEN` para las actions de este job.
@@ -93,7 +93,7 @@ jobs:
 
     steps:
       # Se instancia la imagen de Docker en un container del cloud de MS Azure.
-      # La infraestructura de Azure existe previo a este workflow.
+      # La infraestructura de Azure existe previamente a la ejecución de este workflow.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -104,6 +104,8 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ github.sha }}
 
   # Ref: https://github.com/marketplace/actions/slack-notify
+  # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
+  # El workspace de Slack existe previamente a la ejecución de este workflow.
   feedback:
     needs: [integration, containerization, deployment]
     if: always()
@@ -116,4 +118,5 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: pipeline
+          SLACK_STATUS: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
