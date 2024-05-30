@@ -40,7 +40,7 @@
 	article {
 		font-size: 15px;
 	}
-	
+
 	button {
 		padding: 8px 16px;
 		border-radius: 5px;
