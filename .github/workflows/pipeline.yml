@@ -118,5 +118,5 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: pipeline
-          SLACK_STATUS: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
