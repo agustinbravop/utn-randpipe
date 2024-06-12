@@ -30,7 +30,7 @@ jobs:
       # Vitest ejecuta las pruebas unitarias y de componente.
       # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
       # Hace un reporte de coverage que solo es informativo, no invalida la build.
-      - name: Tests
+      - name: Run tests
         run: npm run coverage
 
       # Se construye la app para validar que se compila correctamente.
@@ -64,7 +64,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
-      - name: Log in to Container registry
+      - name: Log in to container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -112,23 +112,23 @@ jobs:
       PR_NUMBER: ${{ github.event.number }}
       SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
       DESTINATION_BRANCH: ${{ github.base_ref }}
-      HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
     steps:
       # Para poder acceder a datos del repositorio en el paso siguiente.
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Logging
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+      - name: Get head commit message
         run: |
-          echo "$GITHUB_CONTEXT"
+          # Get the last commit message, not the merge commit.
+          text=$(git log -1 --no-merges --pretty=%B)
+          # Save it to the environment so that the next step can use it. 
+          echo "head_commit_message=${text}" >> $GITHUB_ENV
 
       # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
       # El workspace de Slack existe previamente a la ejecución de este workflow.
       # Ref: https://github.com/marketplace/actions/slack-notify
-      - name: Slack Notification
+      - name: Slack notification
         uses: rtCamp/action-slack-notify@v2
         env:
           # Enviar mensajes en el canal #pipeline.
@@ -140,8 +140,8 @@ jobs:
           # Determina si la acción fue un 'success' o un 'failure' y el color verde o rojo asociado.
           SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           # Mensaje personalizado para una ejecución con éxito.
-          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on pull request <${{ env.PR_URL }}|${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.head_commit_message }}"
           # Mensaje personalizado para una ejecución sin éxito.
-          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed*! on pull request <${{ env.PR_URL }}|${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed*! on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}>: '${{ github.event.pull_request.title }}' from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.head_commit_message }}"
           # Para usar `\` en los mensajes.
           ENABLE_ESCAPES: true
