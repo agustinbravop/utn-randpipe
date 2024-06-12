@@ -120,7 +120,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Logging
-        run: echo "${{toJSON(github.event)}}"
+        run: |
+          echo "${{toJSON(github.event)}}"
       # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
       # El workspace de Slack existe previamente a la ejecución de este workflow.
       # Ref: https://github.com/marketplace/actions/slack-notify
