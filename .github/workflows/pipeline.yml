@@ -117,12 +117,13 @@ jobs:
       # Para poder acceder a datos del repositorio en el paso siguiente.
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Get head commit message
         run: |
-          echo $(git log HEAD -10 --no-merges --pretty=%B)
           # Get the last commit message, not the merge commit.
-          text=$(git log HEAD -1 --no-merges --pretty=%B)
+          text=$(git log -1 --no-merges --pretty=%B)
           # Save it to the environment so that the next step can use it. 
           echo "head_commit_message=${text}" >> $GITHUB_ENV
 
