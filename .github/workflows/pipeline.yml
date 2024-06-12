@@ -1,4 +1,4 @@
-name: Integration
+name: Continuous Integration
 on: [pull_request]
 
 jobs:
@@ -108,7 +108,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     env:
-      PR_URL: "https://${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
+      PR_URL: "{{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
       PR_NUMBER: ${{ github.event.number }}
       SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
       DESTINATION_BRANCH: ${{ github.base_ref }}
@@ -121,11 +121,12 @@ jobs:
           fetch-depth: 0
 
       - name: Get head commit message
+        id: get-commit-message
         run: |
           # Get the last commit message, not the merge commit.
           text=$(git log -1 --no-merges --pretty=%B)
-          # Save it to the environment so that the next step can use it. 
-          echo "head_commit_message=${text}" >> $GITHUB_ENV
+          # Set it as an output parameter so that the next step can retrieve it. 
+          echo "COMMIT_MESSAGE=${text}" >> $GITHUB_OUTPUT
 
       # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
       # El workspace de Slack existe previamente a la ejecución de este workflow.
@@ -142,8 +143,8 @@ jobs:
           # Determina si la acción fue un 'success' o un 'failure' y el color verde o rojo asociado.
           SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           # Mensaje personalizado para una ejecución con éxito.
-          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.head_commit_message }}"
+          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Commit message*: ${{ steps.get-commit-message.outputs.COMMIT_MESSAGE }}"
           # Mensaje personalizado para una ejecución sin éxito.
-          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed*! on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}>: '${{ github.event.pull_request.title }}' from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.head_commit_message }}"
+          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}>: '${{ github.event.pull_request.title }}' from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Commit message*: ${{ steps.get-commit-message.outputs.COMMIT_MESSAGE }}"
           # Para usar `\` en los mensajes.
           ENABLE_ESCAPES: true
