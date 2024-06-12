@@ -36,7 +36,7 @@ describe("Picker component", async () => {
 
 	it("picks with an empty list of options", async () => {
 		const { picker } = setup();
-		picks.set([]); 	// Setear la lista vacía de opciones.
+		picks.set([]); // Setear la lista vacía de opciones.
 
 		await userEvent.click(picker);
 
