@@ -16,16 +16,33 @@ describe("Picker component", async () => {
 		expect(screen.getByTitle("picked").textContent).toBe("");
 	});
 
-	it("picks and displays one option at random", async () => {
+	it("picks one option at random and displays it", async () => {
 		const { picker } = setup();
 		const options = ["Hockey", "Rugby", "Tennis"];
 		picks.set(options);
 
 		await userEvent.click(picker);
 
+		// Por la transición, durante unos microsegundos hay dos elementos con id 'picked'.
+		// El último de los dos es el elemento nuevo. El `pop()` es para obtenerlo.
+		let result = screen.getAllByTitle("picked").pop();
+		expect(options).toContain(result?.textContent);
+
+		// Probar de nuevo otra selección.
+		await userEvent.click(picker);
+		result = screen.getAllByTitle("picked").pop();
+		expect(options).toContain(result?.textContent);
+	});
+
+	it("picks with an empty list of options", async () => {
+		const { picker } = setup();
+		picks.set([]); // Setear la lista vacía de opciones.
+
+		await userEvent.click(picker);
+
 		// Por la transición, durante unos microsegundos hay dos elementos
 		// con id 'picked'. El último de los dos es el elemento nuevo.
 		const result = screen.getAllByTitle("picked").pop();
-		expect(options).toContain(result?.textContent);
+		expect(result?.textContent).toBeFalsy();
 	});
 });

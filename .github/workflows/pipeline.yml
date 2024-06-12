@@ -29,8 +29,9 @@ jobs:
 
       # Vitest ejecuta las pruebas unitarias y de componente.
       # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
+      # Hace un reporte de coverage que solo es informativo, no invalida la build.
       - name: Tests
-        run: npm run test
+        run: npm run coverage
 
       # Se construye la app para validar que se compila correctamente.
       # Nota: Como esto es JS + CSS + HTML, los pasos previos no necesitan una build.
