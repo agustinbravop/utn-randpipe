@@ -25,7 +25,7 @@ jobs:
       # Prettier verifica que el formato del código se adhiera a la guía de estilos configurada.
       # `svelte-check` hace un diagnóstico de CSS no utilizado y errores de compilador.
       - name: Code inspection
-        run: npm run lint && npm run check
+        run: npm run check && npm run lint
 
       # Vitest ejecuta las pruebas unitarias y de componente.
       # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
@@ -107,6 +107,13 @@ jobs:
     needs: [integration, containerization, deployment]
     if: always()
     runs-on: ubuntu-latest
+    env:
+      PR_URL: "https://${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
+      PR_NUMBER: ${{ github.event.number }}
+      SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+      DESTINATION_BRANCH: ${{ github.base_ref }}
+      HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+
     steps:
       # Para poder acceder a datos del repositorio en el paso siguiente.
       - name: Checkout code
@@ -119,5 +126,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: pipeline
-          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          SLACK_ON_SUCCESS: "\n**✅ Pipeline succeded!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_ON_FAILURE: "\n**⛔ Pipeline failed!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
