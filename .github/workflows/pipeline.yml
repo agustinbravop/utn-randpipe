@@ -139,5 +139,3 @@ jobs:
           SLACK_MESSAGE_ON_FAILURE: "\n**⛔ Pipeline failed!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
           # Para usar `\` en los mensajes.
           ENABLE_ESCAPES: true
-          # Para interpretar * como negrita y ` como código.
-          SLACKIFY_MARKDOWN: true
