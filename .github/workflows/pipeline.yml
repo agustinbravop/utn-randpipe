@@ -119,6 +119,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Logging
+        run: echo "${{toJSON(github.event)}}"
       # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
       # El workspace de Slack existe previamente a la ejecución de este workflow.
       # Ref: https://github.com/marketplace/actions/slack-notify
@@ -134,8 +136,8 @@ jobs:
           # Determina si la acción fue un 'success' o un 'failure' y el color verde o rojo asociado.
           SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           # Mensaje personalizado para una ejecución con éxito.
-          SLACK_MESSAGE_ON_SUCCESS: "\n**✅ Pipeline succeded!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on pull request <${{ env.PR_URL }}|${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.HEAD_COMMIT_MESSAGE }}"
           # Mensaje personalizado para una ejecución sin éxito.
-          SLACK_MESSAGE_ON_FAILURE: "\n**⛔ Pipeline failed!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed*! on pull request <${{ env.PR_URL }}|${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Head commit message*: ${{ env.HEAD_COMMIT_MESSAGE }}"
           # Para usar `\` en los mensajes.
           ENABLE_ESCAPES: true
