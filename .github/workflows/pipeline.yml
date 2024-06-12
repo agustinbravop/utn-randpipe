@@ -121,7 +121,7 @@ jobs:
       - name: Get head commit message
         run: |
           # Get the last commit message, not the merge commit.
-          text=$(git log -1 --no-merges --pretty=%B)
+          text=$(git log HEAD@{1} -1 --no-merges --pretty=%B)
           # Save it to the environment so that the next step can use it. 
           echo "head_commit_message=${text}" >> $GITHUB_ENV
 
