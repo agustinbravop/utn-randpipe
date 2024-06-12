@@ -9,7 +9,7 @@ export default defineConfig({
 		include: ["src/**/*.{test,spec}.{js,ts}"],
 		coverage: {
 			reporter: ["text", "json", "html"],
-			include: ["**/src/**/*.{svelte,js,ts}"],
+			include: ["**/src/**/*.{svelte,js,ts}"]
 		}
 	}
 });
