@@ -130,10 +130,14 @@ jobs:
           # Autorizado como una Slack App.
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           # Incluir el Actions URL y commit (y omitir Ref y Event).
-          MSG_MINIMAL: actions url, commit
+          MSG_MINIMAL: actions url,commit
           # Determina si la acción fue un 'success' o un 'failure' y el color verde o rojo asociado.
           SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           # Mensaje personalizado para una ejecución con éxito.
-          SLACK_ON_SUCCESS: "\n**✅ Pipeline succeded!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_SUCCESS: "\n**✅ Pipeline succeded!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
           # Mensaje personalizado para una ejecución sin éxito.
-          SLACK_ON_FAILURE: "\n**⛔ Pipeline failed!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          SLACK_MESSAGE_ON_FAILURE: "\n**⛔ Pipeline failed!**\nPull request `${{ env.PR_NUMBER }}` from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n**Head commit message**: ${{ env.HEAD_COMMIT_MESSAGE }}"
+          # Para usar `\` en los mensajes.
+          ENABLE_ESCAPES: true
+          # Para interpretar * como negrita y ` como código.
+          SLACKIFY_MARKDOWN: true
