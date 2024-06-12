@@ -108,7 +108,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     env:
-      PR_URL: "{{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
+      PR_URL: "${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
       PR_NUMBER: ${{ github.event.number }}
       SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
       DESTINATION_BRANCH: ${{ github.base_ref }}
