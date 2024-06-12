@@ -1,4 +1,4 @@
-name: Integration
+name: Continuous Integration
 on: [pull_request]
 
 jobs:
@@ -25,12 +25,12 @@ jobs:
       # Prettier verifica que el formato del código se adhiera a la guía de estilos configurada.
       # `svelte-check` hace un diagnóstico de CSS no utilizado y errores de compilador.
       - name: Code inspection
-        run: npm run lint && npm run check
+        run: npm run check && npm run lint
 
       # Vitest ejecuta las pruebas unitarias y de componente.
       # Algunas pruebas utilizan `jsdom` como entorno (minimalista) de browser.
       # Hace un reporte de coverage que solo es informativo, no invalida la build.
-      - name: Tests
+      - name: Run tests
         run: npm run coverage
 
       # Se construye la app para validar que se compila correctamente.
@@ -64,7 +64,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
-      - name: Log in to Container registry
+      - name: Log in to container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -107,17 +107,44 @@ jobs:
     needs: [integration, containerization, deployment]
     if: always()
     runs-on: ubuntu-latest
+    env:
+      PR_URL: "${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/pull/${{ github.event.number }}"
+      PR_NUMBER: ${{ github.event.number }}
+      SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+      DESTINATION_BRANCH: ${{ github.base_ref }}
+
     steps:
       # Para poder acceder a datos del repositorio en el paso siguiente.
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get head commit message
+        id: get-commit-message
+        run: |
+          # Get the last commit message, not the merge commit.
+          text=$(git log -1 --no-merges --pretty=%B)
+          # Set it as an output parameter so that the next step can retrieve it. 
+          echo "COMMIT_MESSAGE=${text}" >> $GITHUB_OUTPUT
 
       # Envía un mensaje a un canal de Slack mediante una "Slack App" preconfigurada.
       # El workspace de Slack existe previamente a la ejecución de este workflow.
       # Ref: https://github.com/marketplace/actions/slack-notify
-      - name: Slack Notification
+      - name: Slack notification
         uses: rtCamp/action-slack-notify@v2
         env:
+          # Enviar mensajes en el canal #pipeline.
           SLACK_CHANNEL: pipeline
-          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          # Autorizado como una Slack App.
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          # Incluir el Actions URL y commit (y omitir Ref y Event).
+          MSG_MINIMAL: actions url,commit
+          # Determina si la acción fue un 'success' o un 'failure' y el color verde o rojo asociado.
+          SLACK_COLOR: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
+          # Mensaje personalizado para una ejecución con éxito.
+          SLACK_MESSAGE_ON_SUCCESS: "\n✅ Pipeline *succeded* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}> from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Commit message*: ${{ steps.get-commit-message.outputs.COMMIT_MESSAGE }}"
+          # Mensaje personalizado para una ejecución sin éxito.
+          SLACK_MESSAGE_ON_FAILURE: "\n⛔ Pipeline *failed* on <${{ env.PR_URL }}|pull request #${{ env.PR_NUMBER }}>: '${{ github.event.pull_request.title }}' from branch `${{ env.SOURCE_BRANCH }}` to branch `${{ env.DESTINATION_BRANCH }}`.\n*Commit message*: ${{ steps.get-commit-message.outputs.COMMIT_MESSAGE }}"
+          # Para usar `\` en los mensajes.
+          ENABLE_ESCAPES: true
